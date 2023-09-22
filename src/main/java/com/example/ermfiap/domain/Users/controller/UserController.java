@@ -2,6 +2,7 @@ package com.example.ermfiap.domain.Users.controller;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.ermfiap.domain.Users.entity.Users;
 import com.example.ermfiap.domain.Users.repository.UsersSprigDataRepository;
 import org.springframework.http.ResponseEntity;
@@ -52,5 +53,15 @@ public class UserController {
             return ResponseEntity.status(401).build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @PutMapping("/users/logout")
+    public ResponseEntity<String> logout(@RequestBody Users user) {
+        DecodedJWT decodedObj = JWT.decode(user.getTokenAccess());
+        Optional<Users> searchUser = repository.findByEmailEquals(decodedObj.getIssuer());
+        searchUser.get().setTokenAccess(null);
+        repository.save(searchUser.get());
+        System.out.println("aqui: " + searchUser.get().toString());
+        return ResponseEntity.ok("Success Logout");
     }
 }
