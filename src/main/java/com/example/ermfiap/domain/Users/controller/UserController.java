@@ -23,13 +23,28 @@ public class UserController {
     }
 
     @GetMapping("/users")
-    public List<Users> findAll() {
+    public List<Users> findAll(@RequestHeader(value="x-access-token") String token) {
         return repository.findAll();
     }
 
     @PostMapping("/users")
-    public ResponseEntity<Users> signUp(@RequestBody Users user) {
+    public ResponseEntity<Users> signUp(@RequestHeader(value="x-access-token") String token, @RequestBody Users user) {
         user.setPassword(BCrypt.hashpw(user.getPassword(), BCrypt.gensalt(10)));
+        if (token.equals("secret-key-to-adm")) {
+            user.setType("adm");
+            Users createdUser = repository.save(user);
+            if (createdUser != null) {
+                URI newLocation = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdUser.getId()).toUri();
+                return ResponseEntity.created(newLocation).build();
+            }
+        }
+
+        String email = JWT.decode(token).getIssuer();
+        Optional<Users> searchUser = repository.findByEmailEquals(email);
+        if (searchUser.isEmpty() || !searchUser.get().getType().equals("adm")) {
+            return ResponseEntity.status(401).build();
+        }
+
         Users createdUser = repository.save(user);
         if (createdUser != null) {
             URI newLocation = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdUser.getId()).toUri();

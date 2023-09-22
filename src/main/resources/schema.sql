@@ -9,7 +9,7 @@ create table users (
     primary key (id)
 );
 
-create table campaing (
+create table campaing_entity (
     id bigint not null auto_increment,
     id_user bigint not null,
     name varchar(255) not null,
@@ -19,3 +19,15 @@ create table campaing (
     primary key (id),
     foreign key (id_user) references users(id)
 );
+
+create table click (
+    id bigint not null auto_increment,
+    id_campaing bigint not null,
+    site_origin varchar(128) not null,
+    income DOUBLE PRECISION,
+    paid_click tinyint,
+    click_token varchar(512),
+
+    primary key (id),
+    foreign key (id_campaing) references campaing_entity(id)
+)

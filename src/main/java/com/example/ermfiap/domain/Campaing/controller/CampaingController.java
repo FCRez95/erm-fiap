@@ -4,7 +4,6 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.example.ermfiap.domain.Campaing.entity.CampaingEntity;
 import com.example.ermfiap.domain.Campaing.repository.CampaingSpringDataRepository;
-import com.example.ermfiap.domain.Campaing.repository.CampaingSpringDataRepository;
 import com.example.ermfiap.domain.Users.entity.Users;
 import com.example.ermfiap.domain.Users.repository.UsersSprigDataRepository;
 import org.springframework.http.ResponseEntity;
@@ -49,11 +48,11 @@ public class CampaingController {
         if (user.isEmpty() || !user.get().getId().equals(campaingData.getIdUser())) {
             return ResponseEntity.status(401).build();
         }
-
-        String jwtClickAuther = JWT.create().withIssuer(campaingData.getClickAuther()).sign(Algorithm.HMAC256("MySecret"));
+        CampaingEntity createdCampaing = campaingRepo.save(campaingData);
+        String jwtClickAuther = JWT.create().withIssuer(createdCampaing.getClickAuther() + "@" + createdCampaing.getId()).sign(Algorithm.HMAC256("MySecret"));
         campaingData.setClickAuther(jwtClickAuther);
-        campaingRepo.save(campaingData);
-        return ResponseEntity.ok(campaingData);
+        campaingRepo.save(createdCampaing);
+        return ResponseEntity.ok(createdCampaing);
     }
 
     @DeleteMapping("/campaing/{idCampaing}")
