@@ -4,6 +4,7 @@ create table users (
     email varchar(255) not null,
     password varchar(255) not null,
     type varchar(8) not null,
+    token_access varchar(512),
 
     primary key (id)
 );

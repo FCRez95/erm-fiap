@@ -13,6 +13,7 @@ public class Users {
     private String email;
     private String password;
     private String type;
+    private String tokenAccess;
 
     public Users() {
     }
@@ -67,6 +68,15 @@ public class Users {
 
     public Users setType(String type) {
         this.type = type;
+        return this;
+    }
+
+    public String getTokenAccess() {
+        return tokenAccess;
+    }
+
+    public Users setTokenAccess(String tokenAccess) {
+        this.tokenAccess = tokenAccess;
         return this;
     }
 

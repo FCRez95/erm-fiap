@@ -1,5 +1,7 @@
 package com.example.ermfiap.domain.Users.controller;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.example.ermfiap.domain.Users.entity.Users;
 import com.example.ermfiap.domain.Users.repository.UsersSprigDataRepository;
 import org.springframework.http.ResponseEntity;
@@ -9,9 +11,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
-@RequestMapping("users")
 public class UserController {
     private UsersSprigDataRepository repository;
 
@@ -19,17 +21,36 @@ public class UserController {
         this.repository = repository;
     }
 
-    @GetMapping
+    @GetMapping("/users")
     public List<Users> findAll() {
         return repository.findAll();
     }
 
-    @PostMapping
+    @PostMapping("/users")
     public ResponseEntity<Users> signUp(@RequestBody Users user) {
         user.setPassword(BCrypt.hashpw(user.getPassword(), BCrypt.gensalt(10)));
         Users createdUser = repository.save(user);
+        if (createdUser != null) {
+            URI newLocation = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdUser.getId()).toUri();
+            return ResponseEntity.created(newLocation).build();
+        }
 
-        URI newLocation = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdUser.getId()).toUri();
-        return ResponseEntity.created(newLocation).build();
+        return ResponseEntity.badRequest().build();
+    }
+
+    @PutMapping("users/login")
+    public ResponseEntity<String> login(@RequestBody Users user) {
+        Optional<Users> searchUser = repository.findByEmailEquals(user.getEmail());
+
+        if(searchUser.isPresent()) {
+            if(BCrypt.checkpw(user.getPassword(), searchUser.get().getPassword())) {
+                String jwtToken = JWT.create().withIssuer(user.getEmail()).sign(Algorithm.HMAC256("MySecret"));
+                searchUser.get().setTokenAccess(jwtToken);
+                repository.save(searchUser.get());
+                return ResponseEntity.ok(jwtToken);
+            }
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.notFound().build();
     }
 }
