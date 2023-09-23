@@ -14,6 +14,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
+@CrossOrigin(maxAge = 3600)
 @RestController
 public class UserController {
     private UsersSprigDataRepository repository;
@@ -55,15 +56,16 @@ public class UserController {
     }
 
     @PutMapping("users/login")
-    public ResponseEntity<String> login(@RequestBody Users user) {
+    public ResponseEntity<Users> login(@RequestBody Users user) {
+        System.out.println("HELLO: " + user);
         Optional<Users> searchUser = repository.findByEmailEquals(user.getEmail());
 
         if(searchUser.isPresent()) {
             if(BCrypt.checkpw(user.getPassword(), searchUser.get().getPassword())) {
                 String jwtToken = JWT.create().withIssuer(user.getEmail()).sign(Algorithm.HMAC256("MySecret"));
                 searchUser.get().setTokenAccess(jwtToken);
-                repository.save(searchUser.get());
-                return ResponseEntity.ok(jwtToken);
+                Users loggedUser = repository.save(searchUser.get());
+                return ResponseEntity.ok(loggedUser);
             }
             return ResponseEntity.status(401).build();
         }
