@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
+@CrossOrigin(maxAge = 3600)
 @RestController
 public class ClickController {
     private ClickRepository clickRepository;
@@ -63,13 +64,12 @@ public class ClickController {
 
         Optional<Integer> totalClicks = clickRepository.countByIdCampaing(idCampaing);
         Optional<Integer> paidClicks = clickRepository.countByIdCampaingAndPaidClick(idCampaing, true);
-        Double totalSum = clickRepository.sumIncome(idCampaing);
+        Optional<Double> totalSum = clickRepository.sumIncome(idCampaing);
 
-        CampaingSummary summary = new CampaingSummary();
-        summary.setTotalClicks(totalClicks.get());
-        summary.setTotalPaidClicks(paidClicks.get());
-        summary.setIncome(totalSum);
-        System.out.println("AQUAAAA: " + summary.getTotalClicks() + " paidClicks: " + summary.getTotalPaidClicks() + " totalIncome: " + totalSum);
+        CampaingSummary summary = new CampaingSummary(0.0, 0, 0);
+        if(totalClicks.isPresent()) summary.setTotalClicks(totalClicks.get());
+        if (paidClicks.isPresent()) summary.setTotalPaidClicks(paidClicks.get());
+        if (totalSum.isPresent()) summary.setIncome(totalSum.get());
         return ResponseEntity.ok(summary);
     }
 }

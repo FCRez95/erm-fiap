@@ -13,5 +13,5 @@ public interface ClickRepository extends JpaRepository<Click, Long> {
     Optional<Integer> countByIdCampaing(Long idCampaing);
     Optional<Integer> countByIdCampaingAndPaidClick(Long idCampaing, Boolean paidClick);
     @Query("select sum(income) from Click where idCampaing = :idCampaing")
-    double sumIncome(@Param("idCampaing") Long idCampaing);
+    Optional<Double> sumIncome(@Param("idCampaing") Long idCampaing);
 }
