@@ -35,8 +35,7 @@ public class UserController {
             user.setType("adm");
             Users createdUser = repository.save(user);
             if (createdUser != null) {
-                URI newLocation = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdUser.getId()).toUri();
-                return ResponseEntity.created(newLocation).build();
+                return ResponseEntity.ok(createdUser);
             }
         }
 
@@ -48,8 +47,7 @@ public class UserController {
 
         Users createdUser = repository.save(user);
         if (createdUser != null) {
-            URI newLocation = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdUser.getId()).toUri();
-            return ResponseEntity.created(newLocation).build();
+            return ResponseEntity.ok(createdUser);
         }
 
         return ResponseEntity.badRequest().build();
