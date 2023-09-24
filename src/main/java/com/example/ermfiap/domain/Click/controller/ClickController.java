@@ -9,9 +9,12 @@ import com.example.ermfiap.domain.Click.entity.Click;
 import com.example.ermfiap.domain.Click.repository.ClickRepository;
 import com.example.ermfiap.domain.Users.entity.Users;
 import com.example.ermfiap.domain.Users.repository.UsersSprigDataRepository;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.*;
 
 @CrossOrigin(maxAge = 3600)
@@ -27,14 +30,16 @@ public class ClickController {
         this.userRepository = userRepository;
     }
 
-    @PostMapping("/click")
+    @PostMapping(path="/click")
     public ResponseEntity<Click> createClick(@RequestHeader(value="x-access-token") String clickAuther, @RequestBody Click click) {
         String decoded = JWT.decode(clickAuther).getIssuer();
+        System.out.println(clickAuther);
         String[] splitDecoded = decoded.split("@", 2);
         click.setIdCampaing(Long.valueOf(splitDecoded[1]));
         click.setClickToken(JWT.create().withIssuer(click.getSiteOrigin()).withClaim("timeStamp", new Date()).sign(Algorithm.HMAC256("MySecret")));
 
         Click createdClick = clickRepository.save(click);
+        createdClick.setSiteOrigin(decoded.split("@",2)[0] + "?clickToken=" + createdClick.getClickToken());
         return ResponseEntity.ok(createdClick);
     }
 
