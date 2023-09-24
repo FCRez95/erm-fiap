@@ -63,7 +63,7 @@ public class ClickController {
         String email = JWT.decode(tokenAccess).getIssuer();
         Users user = userRepository.findByEmailEquals(email).get();
         Optional<CampaingEntity> campaing = campaingRepository.findById(idCampaing);
-        if (campaing.isEmpty() || campaing.get().getIdUser() != user.getId()) {
+        if (campaing.isEmpty() || campaing.get().getIdUser() != user.getId() && !user.getType().equals("adm")) {
             return ResponseEntity.status(401).build();
         }
 
@@ -72,7 +72,7 @@ public class ClickController {
         Optional<Double> totalSum = clickRepository.sumIncome(idCampaing);
 
         CampaingSummary summary = new CampaingSummary(0.0, 0, 0);
-        if(totalClicks.isPresent()) summary.setTotalClicks(totalClicks.get());
+        if (totalClicks.isPresent()) summary.setTotalClicks(totalClicks.get());
         if (paidClicks.isPresent()) summary.setTotalPaidClicks(paidClicks.get());
         if (totalSum.isPresent()) summary.setIncome(totalSum.get());
         return ResponseEntity.ok(summary);

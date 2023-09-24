@@ -41,6 +41,19 @@ public class CampaingController {
         return ResponseEntity.notFound().build();
     }
 
+    @GetMapping("/campaing")
+    public ResponseEntity<List<CampaingEntity>> getAllCampaings(@RequestHeader(value="x-access-token") String token) {
+        String email = JWT.decode(token).getIssuer();
+        Optional<Users> user = userRepo.findByEmailEquals(email);
+        if (user.isEmpty() || !user.get().getType().equals("adm")) {
+            return ResponseEntity.status(401).build();
+        }
+
+        List<CampaingEntity> campaings = campaingRepo.findAll();
+
+        return ResponseEntity.ok(campaings);
+    }
+
     @PostMapping("/campaing")
     public ResponseEntity<CampaingEntity> createCampaing(@RequestHeader(value="x-access-token") String token, @RequestBody CampaingEntity campaingData) {
         String email = JWT.decode(token).getIssuer();

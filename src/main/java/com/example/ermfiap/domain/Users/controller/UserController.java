@@ -57,7 +57,6 @@ public class UserController {
 
     @PutMapping("users/login")
     public ResponseEntity<Users> login(@RequestBody Users user) {
-        System.out.println("HELLO: " + user);
         Optional<Users> searchUser = repository.findByEmailEquals(user.getEmail());
 
         if(searchUser.isPresent()) {
